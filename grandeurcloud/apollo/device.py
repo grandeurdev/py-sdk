@@ -5,7 +5,10 @@
 # can use this SDK to write hardware side code.
 
 # Import handlers
-from grandeurcloud.apollo.handlers.device import duplex as duplex
+from grandeurcloud.apollo.handlers.device import duplex as Duplex
+
+# Import the inteface classes
+from grandeurcloud.apollo.src.device import device as Device
 
 # Import libraries
 from types import SimpleNamespace
@@ -28,26 +31,47 @@ def init(apiKey, token):
     apolloConfig.update(config)
 
     # Create a new duplex handler
-    duplexHandler = duplex(apolloConfig)
+    duplex = Duplex(apolloConfig)
 
     # Store handlers in an object
     handlers = {
-        "duplex": duplexHandler
+        "duplex": duplex
     }
 
     # Init the duplex connection with server
-    duplexHandler.init()
+    duplex.init()
 
     # Create a new namespace 
     res = SimpleNamespace()
 
+    # Function to return the connection status
+    def isConnected():
+        # Check the status
+        if duplex.status == "CONNECTED":
+            # Return true if the sdk is connected
+            return True
+        else:
+            # Otherwise return a false
+            return False
+
     # Function to place listener on connection event
     def onConnection(callback):
         # Use the duplex connection handler to place the listener
-        duplexHandler.onConnection(callback)
+        duplex.onConnection(callback)
+
+    # Function to get reference to device class
+    def device(deviceID):
+        # We will create a new device class reference and will return it
+        return Device(handlers, deviceID)
 
     # Add onConnection event handler to namespace
     res.onConnection = onConnection
+
+    # Add isConnected function
+    res.isConnected = isConnected
+
+    # Add device function
+    res.device = device
 
     # and return
     return res

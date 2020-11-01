@@ -10,11 +10,22 @@ def onConnection(state):
     # Print the current state
     print(state)
 
+# Callback function to get summary
+def handleSummary(data):
+    # Print
+    print(data)
+
 # Init the SDK and get reference to the project
 project = apollo.init(apiKey, token)
 
 # Place listener
 project.onConnection(onConnection)
+
+# Get a reference to device class
+device = project.device("devicekgmwm6f26bzk01ye1o725t0u")
+
+# Get summary of the device
+device.getSummary(handleSummary)
 
 # Block main thread
 while 1:
