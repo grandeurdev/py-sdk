@@ -12,14 +12,19 @@ from grandeurcloud.apollo.src.device import device as Device
 
 # Import libraries
 from types import SimpleNamespace
+from typing import TypeVar
+from typing import Callable
 
 # Define the endpoint url
 config = {
     "node": "wss://api.grandeur.tech"
 }
 
+# Define apollo type
+Apollo = TypeVar('Apollo')
+
 # Function to init the SDK
-def init(apiKey, token): 
+def init(apiKey: str, token: str) -> Apollo : 
     # Returns an object to supported classes
     # like for devices and datastore
     apolloConfig = {
@@ -45,7 +50,7 @@ def init(apiKey, token):
     res = SimpleNamespace()
 
     # Function to return the connection status
-    def isConnected():
+    def isConnected() ->  bool:
         # Check the status
         if duplex.status == "CONNECTED":
             # Return true if the sdk is connected
@@ -55,12 +60,12 @@ def init(apiKey, token):
             return False
 
     # Function to place listener on connection event
-    def onConnection(callback):
+    def onConnection(callback: Callable[[str], None]) -> None:
         # Use the duplex connection handler to place the listener
         duplex.onConnection(callback)
 
     # Function to get reference to device class
-    def device(deviceID):
+    def device(deviceID: str) -> Device:
         # We will create a new device class reference and will return it
         return Device(handlers, deviceID)
 

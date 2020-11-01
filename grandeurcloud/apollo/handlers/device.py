@@ -5,15 +5,20 @@
 # Import libraries
 import websocket
 import threading
-from types import SimpleNamespace
-from pyee import BaseEventEmitter
 import json   
 import time
+from types import SimpleNamespace
+from pyee import BaseEventEmitter
+from typing import TypeVar
+from typing import Callable
+
+# Define subscriber type
+Subscriber = TypeVar('Subscriber')
 
 class duplex:
 
     # Constructor of the class
-    def __init__(self, config):
+    def __init__(self, config: dict):
         # Setup the connection url
         self.node = config["node"] + "?type=device&apiKey=" + config["apiKey"]
 
@@ -42,7 +47,7 @@ class duplex:
         self.events = ["deviceSummary", "deviceParms"]
 
     # Function to init the connection
-    def init(self):
+    def init(self) -> None:
         # Setup authorization header
         auth = "Authorization: " + self.token
 
@@ -104,7 +109,7 @@ class duplex:
         wst.start()
 
     # Function to enable users to subscribe to connection updates
-    def onConnection(self, callback):
+    def onConnection(self, callback: Callable[[dict], None]) -> Subscriber:
         # Store the callback in context
         self.cConnection = callback
 
@@ -160,7 +165,7 @@ class duplex:
         self.queue.clear()
 
     # Function to send a packet to the server
-    def send(self, packet, callback):
+    def send(self, packet: dict, callback: Callable[[dict], None]) -> None:
         # Start with generating a new id
         id = time.time()
 
@@ -180,7 +185,7 @@ class duplex:
             self.queue.append(packet)
     
     # Function to subscribe to an event
-    def subscribe(self, event, deviceID, callback):
+    def subscribe(self, event: str, deviceID: str, callback: Callable[[dict], None]) -> Subscriber:
         # We will start with validating the event
         try:
             # Check if event exists in the list
@@ -217,7 +222,7 @@ class duplex:
         res = SimpleNamespace()
 
         # Define clear function
-        def clear(c): 
+        def clear(c: Callable[[dict], None]) -> None: 
             # Create the packet
             packet = {
                 "header": {
