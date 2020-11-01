@@ -26,6 +26,9 @@ class duplex:
         # Create variable to store tasks
         self.tasks = BaseEventEmitter()
 
+        # Create event register for subscriptions
+        self.subscriptions = BaseEventEmitter()
+
         # Variable for connection callback
         self.cConnection = None
 
@@ -34,6 +37,9 @@ class duplex:
 
         # Queue to store packets temporarily
         self.queue = []
+
+        # Variable to store valid event names
+        self.events = ["deviceSummary", "deviceParms"]
 
     # Function to init the connection
     def init(self):
@@ -76,9 +82,15 @@ class duplex:
         def onmessage(ws, message):
             # Convert the message into json
             data = json.loads(message)
-            
-            # Emit event and send payload
-            self.tasks.emit(data["header"]["id"], data["payload"])
+
+            # Check message type
+            if data["header"]["task"] == "update":
+                # Then instead emit to subscriptions
+                self.subscriptions.emit(data["payload"]["event"] + "/" + data["payload"]["deviceID"], data["payload"]["update"])
+
+            else:
+                # Emit event and send payload
+                self.tasks.emit(data["header"]["id"], data["payload"])
 
         # Then init the connection
         ws = websocket.WebSocketApp(self.node, on_open = onopen, on_message = onmessage, on_close = onclose, header = [auth])
@@ -166,3 +178,65 @@ class duplex:
         else:
             # or otherwise queue it
             self.queue.append(packet)
+    
+    # Function to subscribe to an event
+    def subscribe(self, event, deviceID, callback):
+        # We will start with validating the event
+        try:
+            # Check if event exists in the list
+            self.events.index(event)
+    
+        except:
+            # Return topic invalid error through callback
+            callback({
+                "code": "TOPIC-INVALID"
+            })
+
+            return
+
+        # Form the packet
+        packet = {
+            "header": {
+                "task": "/topic/subscribe"
+            },
+            "payload": {
+                "event": event,
+                "deviceID": deviceID
+            }
+        }
+
+        # Function to handle response of the packet
+        def response(data):
+            # We will then add an event listener
+            self.subscriptions.on(event + "/" + deviceID, callback)
+
+        # Send the data to the server
+        self.send(packet, response)
+
+        # Create a new namespace
+        res = SimpleNamespace()
+
+        # Define clear function
+        def clear(c): 
+            # Create the packet
+            packet = {
+                "header": {
+                    "task": "/topic/unsubscribe"
+                },
+                "payload": {
+                    "event": event,
+                    "deviceID": deviceID
+                }
+            }
+
+            # Remove the listener
+            self.subscriptions.remove_listener(event + "/" + deviceID, callback)
+
+            # Send to server
+            self.send(packet, c)
+
+        # Append a lambda on close key
+        res.clear = clear
+
+        # Return the object
+        return res

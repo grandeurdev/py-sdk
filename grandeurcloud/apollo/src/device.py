@@ -73,3 +73,13 @@ class device:
 
         # Send the packet using duplex
         self.duplex.send(packet, callback)
+
+    # Function to attach listener on summary updates
+    def onSummary(self, callback):
+        # Use duplex to subscribe to event
+        return self.duplex.subscribe("deviceSummary", self.deviceID, callback)
+
+    # Function to attach listener on parms updates
+    def onParms(self, callback):
+        # Use duplex to subscribe to event
+        return self.duplex.subscribe("deviceParms", self.deviceID, callback)
