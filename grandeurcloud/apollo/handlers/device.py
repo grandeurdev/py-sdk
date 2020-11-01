@@ -66,12 +66,11 @@ class duplex:
             if (self.cConnection):
                 self.cConnection("DISCONNECTED")
 
-            # Stop ping
-            self.ping.cancel()
-
             # Try to reconnect
             self.__reconnect()
-            
+
+            # Stop ping
+            self.ping.cancel()
 
         # Function to handle on message event of ws
         def onmessage(ws, message):
@@ -151,7 +150,7 @@ class duplex:
     # Function to send a packet to the server
     def send(self, packet, callback):
         # Start with generating a new id
-        id = int(time.time())
+        id = time.time()
 
         # Then append it to the packet
         packet["header"]["id"] = id

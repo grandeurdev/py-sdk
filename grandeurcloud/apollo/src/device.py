@@ -26,3 +26,50 @@ class device:
 
         # Send the packet using duplex
         self.duplex.send(packet, callback)
+
+    # Function to get the device parms from server
+    def getParms(self, callback):
+        # Form the request packet
+        packet = {
+            "header": {
+                "task": "/device/parms/get"
+            },
+            "payload": {
+                "deviceID": self.deviceID
+            }
+        }
+
+        # Send the packet using duplex
+        self.duplex.send(packet, callback)
+
+    # Function to set the device summary from server
+    def setSummary(self, summary, callback):
+        # Form the request packet
+        packet = {
+            "header": {
+                "task": "/device/summary/set"
+            },
+            "payload": {
+                "deviceID": self.deviceID,
+                "summary": summary
+            }
+        }
+
+        # Send the packet using duplex
+        self.duplex.send(packet, callback)
+
+    # Function to set the device parms from server
+    def setParms(self, parms, callback):
+        # Form the request packet
+        packet = {
+            "header": {
+                "task": "/device/parms/set"
+            },
+            "payload": {
+                "deviceID": self.deviceID,
+                "parms": parms
+            }
+        }
+
+        # Send the packet using duplex
+        self.duplex.send(packet, callback)
