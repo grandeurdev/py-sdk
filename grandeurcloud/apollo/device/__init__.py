@@ -5,10 +5,10 @@
 # can use this SDK to write hardware side code.
 
 # Import handlers
-from grandeurcloud.apollo.handlers.device import duplex as Duplex
+from .handlers import duplex as Duplex
 
 # Import the inteface classes
-from grandeurcloud.apollo.src.device import device as Device
+from .src import device as Device
 
 # Import libraries
 from types import SimpleNamespace
