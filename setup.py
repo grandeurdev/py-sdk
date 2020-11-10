@@ -7,7 +7,7 @@ import setuptools
 # Package metadata.
 name = 'grandeurcloud'
 description = 'This SDK has been designed to enable developers integrate Grandeur Cloud into SOCs with Python'
-version = '0.1.1'
+version = '0.1.2'
 
 # Should be one of:
 # 'Development Status :: 3 - Alpha'
@@ -19,14 +19,6 @@ dependencies = [
     'websocket-client',
 	'pyee',
 ]
-
-# Root directory
-package_root = os.path.abspath(os.path.dirname(__file__))
-
-# Readme file
-readme_filename = os.path.join(package_root, "README.md")
-with io.open(readme_filename, encoding="utf-8") as readme_file:
-    readme = readme_file.read()
 
 # Only include packages under the 'grandeurcloud' namespace.
 packages = [
@@ -44,7 +36,6 @@ setuptools.setup(
     name = name,
     version = version,
     description = description,
-    long_description = readme,
     author = 'Grandeur Technologies',
   	author_email = 'hi@grandeur.tech',
     license = 'MIT',
