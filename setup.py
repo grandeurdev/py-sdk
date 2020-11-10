@@ -1,13 +1,17 @@
 # Import the setup package
-import io
-import os
+from os import path
 
 import setuptools
 
 # Package metadata.
 name = 'grandeurcloud'
 description = 'This SDK has been designed to enable developers integrate Grandeur Cloud into SOCs with Python'
-version = '0.1.2'
+version = '0.1.3'
+
+# Setup long description
+directory = path.abspath(path.dirname(__file__))
+with open(path.join(directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 # Should be one of:
 # 'Development Status :: 3 - Alpha'
@@ -36,6 +40,8 @@ setuptools.setup(
     name = name,
     version = version,
     description = description,
+    long_description = long_description,
+    long_description_content_type = "text/markdown",
     author = 'Grandeur Technologies',
   	author_email = 'hi@grandeur.tech',
     license = 'MIT',
