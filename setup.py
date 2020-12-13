@@ -1,13 +1,18 @@
 # Import the setup package
+from os import path
 import io
-import os
 
 import setuptools
 
 # Package metadata.
-name = 'grandeurcloud'
-description = 'This SDK has been designed to enable developers integrate Grandeur Cloud into SOCs with Python'
-version = '0.1.1'
+name = 'grandeur'
+description = 'This SDK has been designed to enable developers integrate Grandeur into SOCs with Python'
+version = '0.1.0'
+
+# Setup long description
+directory = path.abspath(path.dirname(__file__))
+with io.open(path.join(directory, 'README.md'), encoding="utf-8") as f:
+    long_description = f.read()
 
 # Should be one of:
 # 'Development Status :: 3 - Alpha'
@@ -20,35 +25,28 @@ dependencies = [
 	'pyee',
 ]
 
-# Root directory
-package_root = os.path.abspath(os.path.dirname(__file__))
-
-# Readme file
-readme_filename = os.path.join(package_root, "README.md")
-with io.open(readme_filename, encoding="utf-8") as readme_file:
-    readme = readme_file.read()
-
-# Only include packages under the 'grandeurcloud' namespace.
+# Only include packages under the 'grandeur' namespace.
 packages = [
     package
     for package in setuptools.PEP420PackageFinder.find()
-    if package.startswith("grandeurcloud")
+    if package.startswith("grandeur")
 ]
 
 # Determine which namespaces are needed.
-namespaces = ["grandeurcloud"]
-if "grandeurcloud.apollo" in packages:
-    namespaces.append("grandeurcloud.apollo")
+namespaces = ["grandeur"]
+# if "grandeurcloud.apollo" in packages:
+#     namespaces.append("grandeurcloud.apollo")
 
 setuptools.setup(
     name = name,
     version = version,
     description = description,
-    long_description = readme,
+    long_description = long_description,
+    long_description_content_type = "text/markdown",
     author = 'Grandeur Technologies',
   	author_email = 'hi@grandeur.tech',
     license = 'MIT',
-    url = "https://github.com/grandeurtech/grandeurcloud-py-sdk",
+    url = "https://github.com/grandeurtech/py-sdk",
     classifiers=[
         release_status,
         "Intended Audience :: Developers",
