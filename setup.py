@@ -1,16 +1,17 @@
 # Import the setup package
 from os import path
+import io
 
 import setuptools
 
 # Package metadata.
-name = 'grandeurcloud'
-description = 'This SDK has been designed to enable developers integrate Grandeur Cloud into SOCs with Python'
-version = '0.1.3'
+name = 'grandeur'
+description = 'This SDK has been designed to enable developers integrate Grandeur into SOCs with Python'
+version = '0.1.0'
 
 # Setup long description
 directory = path.abspath(path.dirname(__file__))
-with open(path.join(directory, 'README.md'), encoding='utf-8') as f:
+with io.open(path.join(directory, 'README.md'), encoding="utf-8") as f:
     long_description = f.read()
 
 # Should be one of:
@@ -24,17 +25,17 @@ dependencies = [
 	'pyee',
 ]
 
-# Only include packages under the 'grandeurcloud' namespace.
+# Only include packages under the 'grandeur' namespace.
 packages = [
     package
     for package in setuptools.PEP420PackageFinder.find()
-    if package.startswith("grandeurcloud")
+    if package.startswith("grandeur")
 ]
 
 # Determine which namespaces are needed.
-namespaces = ["grandeurcloud"]
-if "grandeurcloud.apollo" in packages:
-    namespaces.append("grandeurcloud.apollo")
+namespaces = ["grandeur"]
+# if "grandeurcloud.apollo" in packages:
+#     namespaces.append("grandeurcloud.apollo")
 
 setuptools.setup(
     name = name,
@@ -45,7 +46,7 @@ setuptools.setup(
     author = 'Grandeur Technologies',
   	author_email = 'hi@grandeur.tech',
     license = 'MIT',
-    url = "https://github.com/grandeurtech/grandeurcloud-py-sdk",
+    url = "https://github.com/grandeurtech/py-sdk",
     classifiers=[
         release_status,
         "Intended Audience :: Developers",

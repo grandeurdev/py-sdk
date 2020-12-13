@@ -20,23 +20,23 @@ config = {
     "node": "wss://api.grandeur.tech"
 }
 
-# Define apollo type
-Apollo = TypeVar('Apollo')
+# Define grandeur type
+Grandeur = TypeVar('Grandeur')
 
 # Function to init the SDK
-def init(apiKey: str, token: str) -> Apollo : 
+def init(apiKey: str, token: str) -> Grandeur : 
     # Returns an object to supported classes
     # like for devices and datastore
-    apolloConfig = {
+    grandeurConfig = {
         "apiKey": apiKey,
         "token": token
     }
 
     # Append the url to the configuration
-    apolloConfig.update(config)
+    grandeurConfig.update(config)
 
     # Create a new duplex handler
-    duplex = Duplex(apolloConfig)
+    duplex = Duplex(grandeurConfig)
 
     # Store handlers in an object
     handlers = {
