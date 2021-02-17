@@ -7,6 +7,7 @@ import websocket
 import threading
 import json   
 import time
+import re
 from types import SimpleNamespace
 from pyee import BaseEventEmitter
 from typing import TypeVar
@@ -14,6 +15,14 @@ from typing import Callable
 
 # Define subscriber type
 Subscriber = TypeVar('Subscriber')
+
+# Extend event emitter class by pyee
+class EventEmitter(BaseEventEmitter):
+
+    # Function to get event names
+    def eventNames(self) -> dict:
+        # Return keys of events
+        return self._events.keys()
 
 class duplex:
 
@@ -29,10 +38,10 @@ class duplex:
         self.status = "CONNECTING"
 
         # Create variable to store tasks
-        self.tasks = BaseEventEmitter()
+        self.tasks = EventEmitter()
 
         # Create event register for subscriptions
-        self.subscriptions = BaseEventEmitter()
+        self.subscriptions = EventEmitter()
 
         # Variable for connection callback
         self.cConnection = None
@@ -44,7 +53,7 @@ class duplex:
         self.queue = []
 
         # Variable to store valid event names
-        self.events = ["deviceSummary", "deviceParms"]
+        self.events = ["data"]
 
     # Function to init the connection
     def init(self) -> None:
@@ -90,8 +99,23 @@ class duplex:
 
             # Check message type
             if data["header"]["task"] == "update":
-                # Then instead emit to subscriptions
-                self.subscriptions.emit(data["payload"]["event"] + "/" + data["payload"]["deviceID"], data["payload"]["update"])
+                # Backward compatibility
+                if data["payload"]["event"] == "deviceParms" or data["payload"]["event"] == "deviceSummary":
+                    # Change the event name
+                    data["payload"]["event"] = "data"
+
+                # Formulate topic string
+                topic = f'{data["payload"]["deviceID"]}/{data["payload"]["event"]}/{data["payload"]["path"]}'
+
+                # Check the event type
+                if data["payload"]["event"] == "data":
+                    # When the event is data type then use regex method
+                    # Loop over list of topics
+                    for sub in self.subscriptions.eventNames():
+                        # Event emit where there is a possible match
+                        if re.match(sub, topic):
+                            # Found a match so emit 
+                            self.subscriptions.emit(sub, data["payload"]["update"], data["payload"]["path"])
 
             else:
                 # Emit event and send payload
@@ -185,7 +209,7 @@ class duplex:
             self.queue.append(packet)
     
     # Function to subscribe to an event
-    def subscribe(self, event: str, deviceID: str, callback: Callable[[dict], None]) -> Subscriber:
+    def subscribe(self, event: str, deviceID: str, path: str, callback: Callable[[dict], None]) -> Subscriber:
         # We will start with validating the event
         try:
             # Check if event exists in the list
@@ -206,14 +230,15 @@ class duplex:
             },
             "payload": {
                 "event": event,
-                "deviceID": deviceID
+                "deviceID": deviceID,
+                "path": path
             }
         }
 
         # Function to handle response of the packet
         def response(data):
             # We will then add an event listener
-            self.subscriptions.on(event + "/" + deviceID, callback)
+            self.subscriptions.on(f"{deviceID}/{event}/{path}", callback)
 
         # Send the data to the server
         self.send(packet, response)
