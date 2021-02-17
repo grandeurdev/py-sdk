@@ -24,6 +24,31 @@ class EventEmitter(BaseEventEmitter):
         # Return keys of events
         return self._events.keys()
 
+# Object to store the events 
+class buffer():
+
+    # Constructor of buffer
+    def __init__(self):
+        # Init the list where we will store packets
+        self.list = dict()
+
+    # Function to push a packet to the queue
+    def push(self, id: str, packet: str):
+        # Push it to the list
+        self.list[id] = packet
+
+    # Function to loop over each packet in queue
+    def forEach(self, callback: Callable[[str], None]):
+        # Loop over list
+        for key in self.list:
+            # Send packet to callback
+            callback(self.list[key])
+
+    # Remove packet from list
+    def remove(self, id: str):
+        # Delet the key
+        del self.list[id]
+
 class duplex:
 
     # Constructor of the class
@@ -49,8 +74,8 @@ class duplex:
         # Variable to keep track of ping
         self.ping = None
 
-        # Queue to store packets temporarily
-        self.queue = []
+        # Buffer to store packets temporarily
+        self.buffer = buffer()
 
         # Variable to store valid event names
         self.events = ["data"]
@@ -121,6 +146,12 @@ class duplex:
                 # Emit event and send payload
                 self.tasks.emit(data["header"]["id"], data["payload"])
 
+                # Since we have recieved the response so we can now remove
+                # the packet from buffer
+                if (data["header"]["task"] != "/topic/subscribe"):
+                    # If it is not the subscribe packet because we want to keep it
+                    self.buffer.remove(data["header"]["id"])
+
         # Then init the connection
         ws = websocket.WebSocketApp(self.node, on_open = onopen, on_message = onmessage, on_close = onclose, header = [auth])
 
@@ -180,13 +211,13 @@ class duplex:
     
     # Function to send queued tasks to the server
     def __handle(self):
-        # Loop over the queue elements
-        for packet in self.queue:
-            # Send the packet to the server
+        # Loop over packets
+        def send(packet):
+            # and send to server
             self.ws.send(json.dumps(packet))
 
-        # Clear list
-        self.queue.clear()
+        # Call buffer to loop over packets
+        self.buffer.forEach(send)
 
     # Function to send a packet to the server
     def send(self, packet: dict, callback: Callable[[dict], None]) -> None:
@@ -206,7 +237,7 @@ class duplex:
 
         else:
             # or otherwise queue it
-            self.queue.append(packet)
+            self.buffer.push(id, packet)
     
     # Function to subscribe to an event
     def subscribe(self, event: str, deviceID: str, path: str, callback: Callable[[dict], None]) -> Subscriber:
@@ -237,11 +268,26 @@ class duplex:
 
         # Function to handle response of the packet
         def response(data):
-            # We will then add an event listener
+            # Place event listener only after getting a response
             self.subscriptions.on(f"{deviceID}/{event}/{path}", callback)
 
         # Send the data to the server
-        self.send(packet, response)
+        # Start with generating a new id
+        id = time.time()
+
+        # Then append it to the packet
+        packet["header"]["id"] = id
+
+        # Add event handler
+        self.tasks.once(id, response)
+
+        # Push the packet to queue
+        self.buffer.push(id, packet)
+
+        # Then if the sdk is connected to the server
+        if self.status == "CONNECTED":
+            # Then send the packet to the server
+            self.ws.send(json.dumps(packet))
 
         # Create a new namespace
         res = SimpleNamespace()
@@ -261,6 +307,9 @@ class duplex:
 
             # Remove the listener
             self.subscriptions.remove_listener(event + "/" + deviceID, callback)
+
+            # Remove sub packet from buffer
+            self.buffer.remove(id)
 
             # Send to server
             self.send(packet, c)
