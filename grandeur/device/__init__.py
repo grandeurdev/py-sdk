@@ -21,10 +21,10 @@ config = {
 }
 
 # Define grandeur type
-Grandeur = TypeVar('Grandeur')
+Project = TypeVar('Project')
 
 # Function to init the SDK
-def init(apiKey: str, token: str) -> Grandeur : 
+def init(apiKey: str, token: str) -> Project : 
     # Returns an object to supported classes
     # like for devices and datastore
     grandeurConfig = {
