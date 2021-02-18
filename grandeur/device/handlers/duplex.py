@@ -130,17 +130,15 @@ class duplex:
                     data["payload"]["event"] = "data"
 
                 # Formulate topic string
-                topic = f'{data["payload"]["deviceID"]}/{data["payload"]["event"]}/{data["payload"]["path"]}'
+                topic = f'{data["payload"]["event"]}/{data["payload"]["path"]}'
 
-                # Check the event type
-                if data["payload"]["event"] == "data":
-                    # When the event is data type then use regex method
-                    # Loop over list of topics
-                    for sub in self.subscriptions.eventNames():
-                        # Event emit where there is a possible match
-                        if re.match(sub, topic):
-                            # Found a match so emit 
-                            self.subscriptions.emit(sub, data["payload"]["update"], data["payload"]["path"])
+                # When the event is data type then use regex method
+                # Loop over list of topics
+                for sub in self.subscriptions.eventNames():
+                    # Event emit where there is a possible match
+                    if re.match(sub, topic):
+                        # Found a match so emit 
+                        self.subscriptions.emit(sub, data["payload"]["update"], data["payload"]["path"])
 
             else:
                 # Emit event and send payload
@@ -220,12 +218,18 @@ class duplex:
         self.buffer.forEach(send)
 
     # Function to send a packet to the server
-    def send(self, packet: dict, callback: Callable[[dict], None]) -> None:
+    def send(self, event: str, payload: dict, callback: Callable[[dict], None]) -> None:
         # Start with generating a new id
         id = time.time()
 
-        # Then append it to the packet
-        packet["header"]["id"] = id
+        # Formulate the packet
+        packet = {
+            "header": {
+                "id": id,
+                "task": event
+            },
+            "payload": payload
+        }
 
         # Add event handler
         self.tasks.once(id, callback)
@@ -240,7 +244,7 @@ class duplex:
             self.buffer.push(id, packet)
     
     # Function to subscribe to an event
-    def subscribe(self, event: str, deviceID: str, path: str, callback: Callable[[dict], None]) -> Subscriber:
+    def subscribe(self, event: str, payload: str, callback: Callable[[dict], None]) -> Subscriber:
         # We will start with validating the event
         try:
             # Check if event exists in the list
@@ -254,29 +258,23 @@ class duplex:
 
             return
 
-        # Form the packet
-        packet = {
-            "header": {
-                "task": "/topic/subscribe"
-            },
-            "payload": {
-                "event": event,
-                "deviceID": deviceID,
-                "path": path
-            }
-        }
-
         # Function to handle response of the packet
         def response(data):
             # Place event listener only after getting a response
-            self.subscriptions.on(f"{deviceID}/{event}/{path}", callback)
+            self.subscriptions.on(f"{payload['event']}/{payload['path']}", callback)
 
         # Send the data to the server
         # Start with generating a new id
         id = time.time()
 
-        # Then append it to the packet
-        packet["header"]["id"] = id
+        # Form the packet
+        packet = {
+            "header": {
+                "id": id,
+                "task": "/topic/subscribe"
+            },
+            "payload": payload
+        }
 
         # Add event handler
         self.tasks.once(id, response)

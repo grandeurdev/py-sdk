@@ -22,40 +22,37 @@ class data:
     # Function to get the device data from server
     def get(self, path: str, callback: Callable[[dict], None]) -> None:
         # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/data/get"
-            },
-            "payload": {
-                "deviceID": self.deviceID,
-                "path": path
-            }
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path
         }
 
         # Send the packet using duplex
-        self.duplex.send(packet, callback)
+        self.duplex.send("/device/data/get", payload, callback)
 
     # Function to set the device data on server
     def set(self, path: str, data: dict, callback: Callable[[dict], None]) ->  None:
         # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/data/set"
-            },
-            "payload": {
-                "deviceID": self.deviceID,
-                "path": path,
-                "data": data
-            }
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path,
+            "data": data
         }
 
         # Send the packet using duplex
-        self.duplex.send(packet, callback)
+        self.duplex.send("/device/data/set", payload, callback)
 
     # Function to attach listener on data updates
     def on(self, path: str, callback: Callable[[dict], None]) -> Subscriber:
+        # Form the request packet
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path,
+            "event": "data"
+        }
+
         # Use duplex to subscribe to event
-        return self.duplex.subscribe("data", self.deviceID, path, callback)
+        return self.duplex.subscribe("data", payload, callback)
 
 class device:
 
