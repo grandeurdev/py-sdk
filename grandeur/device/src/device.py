@@ -7,8 +7,9 @@ from typing import Callable
 
 # Define subscriber type
 Subscriber = TypeVar('Subscriber')
+Data = TypeVar('Data')
 
-class device:
+class data:
 
     # Constructor of the class
     def __init__(self, handlers: dict, deviceID: str):
@@ -18,75 +19,52 @@ class device:
         # Store device id
         self.deviceID = deviceID
 
-
-    # Function to get the device summary from server
-    def getSummary(self, callback: Callable[[dict], None]) -> None:
+    # Function to get the device data from server
+    def get(self, path: str, callback: Callable[[dict], None]) -> None:
         # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/summary/get"
-            },
-            "payload": {
-                "deviceID": self.deviceID
-            }
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path
         }
 
         # Send the packet using duplex
-        self.duplex.send(packet, callback)
+        self.duplex.send("/device/data/get", payload, callback)
 
-    # Function to get the device parms from server
-    def getParms(self, callback: Callable[[dict], None]) ->  None:
+    # Function to set the device data on server
+    def set(self, path: str, data: dict, callback: Callable[[dict], None]) ->  None:
         # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/parms/get"
-            },
-            "payload": {
-                "deviceID": self.deviceID
-            }
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path,
+            "data": data
         }
 
         # Send the packet using duplex
-        self.duplex.send(packet, callback)
+        self.duplex.send("/device/data/set", payload, callback)
 
-    # Function to set the device summary from server
-    def setSummary(self, summary: dict, callback: Callable[[dict], None]) -> None:
+    # Function to attach listener on data updates
+    def on(self, path: str, callback: Callable[[dict], None]) -> Subscriber:
         # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/summary/set"
-            },
-            "payload": {
-                "deviceID": self.deviceID,
-                "summary": summary
-            }
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path,
+            "event": "data"
         }
 
-        # Send the packet using duplex
-        self.duplex.send(packet, callback)
-
-    # Function to set the device parms from server
-    def setParms(self, parms: dict, callback: Callable[[dict], None]) -> None:
-        # Form the request packet
-        packet = {
-            "header": {
-                "task": "/device/parms/set"
-            },
-            "payload": {
-                "deviceID": self.deviceID,
-                "parms": parms
-            }
-        }
-
-        # Send the packet using duplex
-        self.duplex.send(packet, callback)
-
-    # Function to attach listener on summary updates
-    def onSummary(self, callback: Callable[[dict], None]) -> Subscriber:
         # Use duplex to subscribe to event
-        return self.duplex.subscribe("deviceSummary", self.deviceID, callback)
+        return self.duplex.subscribe("data", payload, callback)
 
-    # Function to attach listener on parms updates
-    def onParms(self, callback: Callable[[dict], None]) -> Subscriber:
-        # Use duplex to subscribe to event
-        return self.duplex.subscribe("deviceParms", self.deviceID, callback)
+class device:
+
+    # Constructor of the class
+    def __init__(self, handlers: dict, deviceID: str):
+        # Get reference to the duplex handler
+        self.handlers = handlers
+
+        # Store device id
+        self.deviceID = deviceID
+
+    # Function get reference to device data
+    def data(self) -> Data:
+        # Return new data object
+        return data(self.handlers, self.deviceID)
