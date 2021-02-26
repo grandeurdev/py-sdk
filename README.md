@@ -24,35 +24,32 @@ Grandeur is not a regular IoT cloud. It's a complete IoT product development and
 
 * No need to mix and match various services to come up with your own solution. Grandeur is a single spot solution for all of your needs, from **built-in authentication** of your users and devices to **an integrated database** to an **out-of-the-box file storage system** and a registry of data for all of your devices. And You can manage absolutely everything from a single dashboard.
 
-* Simple pricing. Unlike Google and AWS, we do not have to deal with a different pricing model for each service and aggregate them together to compute the monthly bill making it almost impossible for the user to understand why he has to pay this much! Packaging all our services into one platform has let us develop a very simple and transparent pricing model. You can [start free][Grandeur Sign Up] for a certain quota and then pay as you go based on your resources consumption. Checkout [pricing][Grandeur Pricing] for more details.
+* Simple pricing. Unlike Google and AWS, we do not have to deal with a different pricing model for each service and aggregate them together to compute the monthly bill making it almost impossible for the user to understand why he has to pay this much! Packaging all our services into one platform has let us develop a very simple and transparent pricing model. You can [start free](https://cloud.grandeur.tech/) for a certain quota and then pay as you go based on your resources consumption. Checkout [pricing](https://grandeur.tech/pricing/) for more details.
 
-* We have a growing [community on Hackster][Grandeur Hackster] which is equivalent to growing number of developers which are using Grandeur and improving the opensource SDKs resulting in increasing Grandeur support.
+* We have a growing [community on Hackster](https://www.hackster.io/grandeur) which is equivalent to growing number of developers which are using Grandeur and improving the opensource SDKs resulting in increasing Grandeur support.
 
-* It is terrifically simple to [get started][Get Started with Grandeur] with your IoT product development. Just create a project from the [cloud dashboard][Grandeur Dashboard], plug your project's API key into our SDKs and start developing.
+* It is terrifically simple to [get started](https://cloud.grandeur.tech/) with your IoT product development. Just create a project from the [cloud dashboard](https://cloud.grandeur.tech/dashboard), plug your project's API key into our SDKs and start developing.
 
-Follow [our Hackster Hub][Grandeur Hackster] for quick starts and advanced development projects.
+Follow [our Hackster Hub](https://www.hackster.io/grandeur) for quick starts and advanced development projects.
 
-[Here][Get Started With Grandeur] is how you can create a new project on Grandeur and start using the Javascript SDK to build your IoT apps.
+[Here](https://github.com/grandeurtech/js-sdk#get-started) is how you can create a new project on Grandeur and start using the Javascript SDK to build your IoT apps.
 
 From here onwards, we'll look at how you can use the Py SDK for all arduino-compatible modules to put your devices live and connected on Grandeur. Let's dive in!
 
 # Py SDK
 
-**Py SDK** is the official SDK for Linux-based Raspberry Pis and SoCs and it utilizes the *Grandeur* API to connect your device to **[Grandeur][Grandeur]**.
+**Py SDK** is the official SDK for Linux-based Raspberry Pis and SoCs and it utilizes the *Grandeur* API to connect your device to **[Grandeur](https://cloud.grandeur.tech/)**.
 
-Follow the [get started][Get Started with Py SDK] guidelines to quickly get into the context of integrating your devices to Grandeur or jump straight to an [Py example][Example] to make your hands dirty.
+Follow the [get started](https://github.com/grandeurtech/py-sdk#get-started) guidelines to quickly get into the context of integrating your devices to Grandeur or jump straight to an [Py example](https://github.com/grandeurtech/py-sdk#example) to make your hands dirty.
 
-For a developer reference for the Py SDK, you can have a look at the [documentation][Documentation].
+For a developer reference for the Py SDK, you can have a look at the [documentation](#documentation).
 
-To get a deeper understanding of the core concepts Grandeur is built upon, dive into the [Grandeur Ecosystem][Ecosystem] section.
+To get a deeper understanding of the core concepts Grandeur is built upon, dive into the [Grandeur Ecosystem](#grandeur-ecosystem) section.
 
 * [Get Started](#get-started)
   * [Installation](#installation)
   * [Inclusion](#inclusion)
-  * [Initialization](#initialization)
-  * [Handling the WiFi](#handling-the-wifi)
-  * [Setting Up the Valve](#setting-up-the-valve)
-  * [Events Listening](#events-listening)
+  * [Setting Up Connection Event Handler](#setting-up-connection-event-handler)
   * [Fetching Device Variables and Updating Them](#fetching-device-variables-and-updating-them)
   * [Handling Updates From the Cloud](#handling-updates-from-the-cloud)
 * [Example](#example)
@@ -75,17 +72,10 @@ To get a deeper understanding of the core concepts Grandeur is built upon, dive 
     * [isConnected](#isconnected)
     * [onConnection](#onconnection)
     * [device](#device)
-    * [datastore](#datastore)
   * [Device](#device)
-    * [getSummary](#getsummary)
-    * [getParms](#getparms)
-    * [setSummary](#setsummary)
-    * [setParms](#setparms)
-    * [onSummary](#onsummary)
-    * [onParms](#onparms)
-  * [Datastore](#datastore)
-    * [insert](#insert)
-* [Enhancements Under Consideration](#enhancements-under-consideration)
+    * [get](#get)
+    * [set](#set)
+    * [on](#on)
 
 ## Get Started
 
@@ -96,7 +86,7 @@ To get a deeper understanding of the core concepts Grandeur is built upon, dive 
 pip install grandeur
 ```
 
-2. You can also clone **Py SDK** from [here][Py SDK].
+2. You can also clone **Py SDK** from [here](https://pypi.org/project/grandeur).
 
 ### Inclusion
 
@@ -160,7 +150,7 @@ On Grandeur, we generally store the device data in a sanboxed contianer. You can
 
 They are all **Async functions** because they communicate with the Cloud through internet. Communication through internet takes some time and we cannot wait, for example, for device's summary variables to arrive from the Cloud — meanwhile blocking the rest of the device program. So, what we do is, we schedule a function to be called when the summary variables and resume with rest of the device program, forgetting that we ever called `getSummary()`. When the summary variables arrive, the SDK calls our scheduled function, giving us access to summary variables inside that function.
 
-Read more about **Async functions** and `Callback` [here][the dexterity of Py SDK].
+Read more about **Async functions** and `Callback` [here](#the-dexterity-of-py-sdk).
 
 Here's how we would get and set device's summary and parms:
 
@@ -173,11 +163,11 @@ def onConnection(state):
     print(state)
 
 # This function prints the variables stored in device
-def getCallback(res):
+def getCallback(code, res):
     print(res["data"])
 
 # This function prints the updated values of the variables
-def setCallback(res):
+def setCallback(code, res):
     print(res["update"])
 
 # Init the SDK and get reference to the project
@@ -218,7 +208,7 @@ def onConnection(state):
     print(state)
 
 # This function prints the updated values of the variables stored
-def updateCallback(update, path):
+def updateCallback(path, update):
     print(update)
 
 # Init the SDK and get reference to the project
@@ -240,9 +230,9 @@ device.data().on("", updateCallback)
 
 ## Example
 
-Here we go through a general example of a Raspberry Pi to explain the **Py SDK** in action. For a little more broken-down approach, do have a look at [these examples][Examples] as well.
+Here we go through a general example of a Raspberry Pi to explain the **Py SDK** in action.
 
-To begin working with the **Py SDK**, the very first step is to [create a new project][Grandeur Dashboard] and [register a new device][Grandeur Devices] through the [Cloud Dashboard][Grandeur Dashboard]. Then create a new python environment to keep your workspace packages isolated from the rest of the packages.
+To begin working with the **Py SDK**, the very first step is to [create a new project](https://cloud.grandeur.tech/) and [register a new device](https://cloud.grandeur.tech/devices) through the [Cloud Dashboard](https://cloud.grandeur.tech/dashboard). Then create a new python environment to keep your workspace packages isolated from the rest of the packages.
 
 ### Create and set up your workspace environment
 
@@ -283,7 +273,7 @@ import grandeur.device as grandeur
 project = grandeur.init(ApiKey, YourToken)
 ```
 
-You can find the API Key on the [settings page][Grandeur Settings] of your project's dashboard. For the Access Token, you need to pair your device with a user account in your project first. A device can only connect to Grandeur if it's paired with a user. And only the paired user can access the device's data through its web app. For convenient testing, we have made device pairing function available on the [devices page][Grandeur Devices] too. You can find your device's ID and pair your device with a user account. If your project has no registered user yet, you can add one easily from the [accounts page][Grandeur Accounts].
+You can find the API Key on the [settings page](https://cloud.grandeur.tech/settings) of your project's dashboard. For the Access Token, you need to pair your device with a user account in your project first. A device can only connect to Grandeur if it's paired with a user. And only the paired user can access the device's data through its web app. For convenient testing, we have made device pairing function available on the [devices page](https://cloud.grandeur.tech/devices) too. You can find your device's ID and pair your device with a user account. If your project has no registered user yet, you can add one easily from the [accounts page](https://cloud.grandeur.tech/accounts).
 
 ### Initialize Your Device
 
@@ -299,7 +289,7 @@ led = LED(17)
 project = grandeur.init(ApiKey, YourToken)
 device = project.device(DeviceID)
 
-def initializeState(res):
+def initializeState(code, res):
   print(res["data"])
   led.value = res["data"]
 
@@ -322,11 +312,11 @@ led = LED(17)
 project = grandeur.init(ApiKey, YourToken)
 device = project.device(DeviceID)
 
-def initializeState(data):
+def initializeState(code, res):
   print(res["data"])
   led.value = res["data"]
 
-def updateState(update):
+def updateState(path, update):
   print(update)
   led.value = update
 
@@ -349,16 +339,16 @@ led = LED(17)
 project = grandeur.init(ApiKey, YourToken)
 device = project.device(DeviceID)
 
-def initializeState(data):
+def initializeState(code, res):
   print(res["data"])
   led.value = res["data"]
 
-def updateState(update):
+def updateState(path, update):
   print(update)
   led.value = update
 
-def printState(res):
-  print(res.update)
+def printState(code, res):
+  print(res["update"])
 
 device.data().get("state", initializeState)
 device.data().on("state", updateState)
@@ -374,23 +364,23 @@ while(1):
 
 ### Test it With Your Web app
 
-You can build a web app for your product to control your hardware device over the cloud. [Here's a simple example for that][An Example Webapp].
+You can build a web app for your product to control your hardware device over the cloud.
 
 ## The Dexterity of Py SDK
 
 The Py SDK is aimed at providing extremely to-the-point functions, being almost invisible in your device program to make the integration of Grandeur in your product seamless. Here is what it does under the hood without you paying attention to the most painful things:
 
-* **Py SDK** takes care of your device's connection to [Grandeur][Grandeur]. **It can start trying to connect with the Cloud as soon as you call `grandeur.init` with the proper credentials.** When it connects, only then does the communication with Grandeur happen. And if somehow the connection breaks, SDK handles the reconnection and everything resumes right from where it left.
+* **Py SDK** takes care of your device's connection to [Grandeur](https://grandeur.tech/). **It can start trying to connect with the Cloud as soon as you call `grandeur.init` with the proper credentials.** When it connects, only then does the communication with Grandeur happen. And if somehow the connection breaks, SDK handles the reconnection and everything resumes right from where it left.
 
-*  **Py SDK** exposes the state of your device (`CONNECTED` or `DISCONNECTED`) through [`getState()`][getState] function to let you make your decisions based on that.
+*  **Py SDK** exposes the state of your device (`CONNECTED` or `DISCONNECTED`) through [`isConnected()`](#isconnected) function to let you make your decisions based on that.
 
-* **Py SDK** is event-driven. You can set **event handler** for device's connection or disconnection with Grandeur by using [`onConnection()`][onConnection]. So, when the device connects or disconnects from the cloud, the function passed to `onConnection()` is called.
+* **Py SDK** is event-driven. You can set **event handler** for device's connection or disconnection with Grandeur by using [`onConnection()`](#onconnection). So, when the device connects or disconnects from the cloud, the function passed to `onConnection()` is called.
 
-* You can also set **update handlers** for device's sdata using [`on()`][on]. So, when the any of the device variables is updated, the function passed to `on()` is called.
+* You can also set **update handlers** for device's sdata using [`on()`](#on). So, when the any of the device variables is updated, the function passed to `on()` is called.
 
 * **Async functions** are what make the event-drive of the SDK possible. They do all the same things as regular functions plus one extra. They receive a function parameter which they schedule for later. 
 
-To see the **Py SDK** in action, jump to [Example][Example].
+To see the **Py SDK** in action, jump to [Example](#example).
 
 # Grandeur Ecosystem
 
@@ -406,11 +396,11 @@ To resolve the energy efficiency issue of these old ACs, you decided to build an
 
 That's where the problem arose. You are a hardware startup, after all, that builds amazing electronics technology. But here you got to deal with a few more things as well. You have to build your app and figure out how to establish its communication with your hardware. You may decide to hire more engineers. But do you know how much of them will you have to hire? To give you a perspective, you generally need 8+ engineers just to do the server-end, like one to figure out your networking, one to design and manage your database, one to develop your API (the interface layer between your users and devices), about four for building your SDKs (one for each platform android, ios, web, and hardware) and then when you start scaling up a bit, one DevOps engineer. This makes it a package of $8000+ just to figure out the backend of your system and you haven't even validated your product yet. This turns out exhausting for your business. You have hit a concrete wall with no idea what to do about it.
 
-Then one day the sun of fate shown. You came across a platform that goes by the name of Grandeur. You went through its [website][Grandeur Technologies] and discovered a perfectly fitting solution for all your headaches. You wanted a solution for authentication of your users, it has the Auth feature in it. You needed online file storage to store maybe the profile pictures of your users and other stuff, it comes with a storage builtin. You were in dire need of a scalable out-of-the-box database to store power consumption logs of your device to show your users graphs on their monthly/yearly savings, it provides a cloud datastore service. And the most important of these all, you needed a realtime communication bridge between your hardware and your apps, THANK GOD, its SDKs are available for all the stacks including Arduino, web, and mobile (both android and ios).
+Then one day the sun of fate shown. You came across a platform that goes by the name of Grandeur. You went through its [website](https://grandeur.tech/) and discovered a perfectly fitting solution for all your headaches. You wanted a solution for authentication of your users, it has the Auth feature in it. You needed online file storage to store maybe the profile pictures of your users and other stuff, it comes with a storage builtin. You were in dire need of a scalable out-of-the-box database to store power consumption logs of your device to show your users graphs on their monthly/yearly savings, it provides a cloud datastore service. And the most important of these all, you needed a realtime communication bridge between your hardware and your apps, THANK GOD, its SDKs are available for all the stacks including Arduino, web, and mobile (both android and ios).
 
-So here you are giving it a shot. You simply [registered for the platform][Grandeur], created your first project, downloaded their SDKs and started connecting your devices and apps through Grandeur. You didn't even have to worry about the security of your users and devices, because the data on Grandeur is protected under standard security protocols. Each user and device in a project is limited in its scope. All you had to worry about was designing your product core and develop your business logic. And in a matter of weeks, your product was out in people's hands, your apps live on app stores. People loved what you built and you were getting live feedback on it. You could see how many people have paired with your devices. You made an early entry into the market and now adding a dent to the universe.
+So here you are giving it a shot. You simply [registered for the platform](https://cloud.grandeur.tech/), created your first project, downloaded their SDKs and started connecting your devices and apps through Grandeur. You didn't even have to worry about the security of your users and devices, because the data on Grandeur is protected under standard security protocols. Each user and device in a project is limited in its scope. All you had to worry about was designing your product core and develop your business logic. And in a matter of weeks, your product was out in people's hands, your apps live on app stores. People loved what you built and you were getting live feedback on it. You could see how many people have paired with your devices. You made an early entry into the market and now adding a dent to the universe.
 
-By the way, that is the story of team SolDrive. Check out their [website][SolDrive] right now and explore how they are transforming the world with Grandeur.
+By the way, that is the story of team SolDrive. Check out their [website](http://sol-drive.com/) right now and explore how they are transforming the world with Grandeur.
 
 ## Concepts
 
@@ -420,7 +410,7 @@ In this subsection, we will explore the Grandeur platform in detail and see how 
 
 A project is the first thing you need to create to start working with Grandeur. A project is like a namespace, a completely isolated network of users and devices, along with separate file storage and a separate datastore. While you can create an unlimited number of projects, but no two projects can interact or share anything with one other.
 
-Each project is identified by a digital signature that we call the API key, just as your identification card or social security number identifies you as a citizen. To connect your apps or hardware to your project's network, this is what you need to provide to the SDKs. The API key is sent with every request to Grandeur and this is what defines the project of the request. Check out the [SDK][SDK] section to read more about it.
+Each project is identified by a digital signature that we call the API key, just as your identification card or social security number identifies you as a citizen. To connect your apps or hardware to your project's network, this is what you need to provide to the SDKs. The API key is sent with every request to Grandeur and this is what defines the project of the request. Check out the [SDK](#sdk) section to read more about it.
 
 > ***NOTE***: Our pricing applies separately to each project. So you get a free tier on every project and pay for each separately for what you consume when you cross your resources limit.
 
@@ -428,23 +418,23 @@ Each project is identified by a digital signature that we call the API key, just
 
 Grandeur is the API that exposes Grandeur to the outside world. Our SDKs utilize this API and map each functionality to a function. We have tried our best to make the integration of our SDKs into your codebase simple. For example, while developing your web app, you simply need to drop in the link of JS SDK CDN in your codebase and you are done. We have developed our SDKs for each platform in coherence with each other so you could work and collaborate everywhere seamlessly.
 
-This is how they work: In every SDK, there is a global object aka. `grandeur`. You can initialize your configurations (API Key and a couple of more stuff in case of hardware SDK) by calling `grandeur.init()`. This returns you a reference to your whole project (in case of your app) or just to your device (in case of hardware because hardware scope is limited to the device itself). In **JS SDK**, you can interact with the authentication API, the device API, the file storage and the datastore API. In the case of **Py SDK** your scope is limited to just the device's namespace. Check out the [Authentication and Access][Authentication and Access] section to get more insight into how scope varies across the different platforms (app and hardware).
+This is how they work: In every SDK, there is a global object aka. `grandeur`. You can initialize your configurations (API Key and a couple of more stuff in case of hardware SDK) by calling `grandeur.init()`. This returns you a reference to your whole project (in case of your app) or just to your device (in case of hardware because hardware scope is limited to the device itself). In **JS SDK**, you can interact with the authentication API, the device API, the file storage and the datastore API. In the case of **Py SDK** your scope is limited to just the device's namespace. Check out the [Authentication and Access](#authentication-and-access) section to get more insight into how scope varies across the different platforms (app and hardware).
 
 ### User and Administrator
 
 This topic is about the relationship between you as an administrator and your users and the access scope of both.
 
-You aka. **the administrator** is an entity that creates, develops and maintains one or more [projects][Project] on Grandeur. The administrator has full authority over a project's resources (users, devices, files, and data) and can monitor and control all its projects from the [dashboard][Grandeur Dashboard].
+You aka. **the administrator** is an entity that creates, develops and maintains one or more [projects](#project) on Grandeur. The administrator has full authority over a project's resources (users, devices, files, and data) and can monitor and control all its projects from the [dashboard](https://cloud.grandeur.tech/dashboard).
 
 A **user** is an entity that uses your product. While you have full control over your project, a user of your product has access to his profile and delegated access limited to its device scope only.
 
 In the real world, you would not want to add a new user or pair a device with that user manually every time someone buys your product. Therefore you delegate a part of your project authorities to the SDK when you plug your project's API Key in. And so a new user gets to sign up, pair, monitor and control your device through your product's companion app.
 
-Using just your project's API Key for full delegation is like putting all of your eggs in one basket. A stolen API Key can give the hacker, at the minimum, user-level access to your project. He can register any number of bogus users and do whatnot. Hence the concept of CORS comes to play. Read more on CORS in [Allowed Origins][Allowed Origins] section.
+Using just your project's API Key for full delegation is like putting all of your eggs in one basket. A stolen API Key can give the hacker, at the minimum, user-level access to your project. He can register any number of bogus users and do whatnot. Hence the concept of CORS comes to play. Read more on CORS in [Allowed Origins](#allowed-origins) section.
 
 ### Device
 
-Devices are the *things* in **Internet of Things** (IoT) around which the IoT product development revolves. Like a user, a device entity has a limited scope of access. But unlike users, you can register new devices only from the dashboard. Read the [Device Registry][Device Registry] section for more on what happens when you register a new device to your project.
+Devices are the *things* in **Internet of Things** (IoT) around which the IoT product development revolves. Like a user, a device entity has a limited scope of access. But unlike users, you can register new devices only from the dashboard. Read the [Device Registry](#device-registry) section for more on what happens when you register a new device to your project.
 
 On Grandeur, a device falls under the ownership of the project's administrator. The project's API Key delegates the device pairing authority to the SDK which the user uses to pair with the device. Pairing a device makes it live on Grandeur and the user gets delegated access to the device's data. But a user cannot delete or modify a device's inherent data because it's not within its scope.
 
@@ -457,7 +447,7 @@ The device entity, in the end, defines two things:
 
 This matters a lot because you would never want your neighbor to control your air conditioner (that would be a horrible situation). That's what this entity has been designed for. A user can only interact with devices that are paired with it.
 
-When you pair a device with a user account, an access token is generated for the device. This token is what the device uses to connect to Grandeur. This token also delegates access of the device namespace to the Py SDK. The Py SDK takes this access token along with the project's API Key while doing `grandeur.init()`. To read about the device's namespace and how the device's data is stored on Grandeur, have a look at the [Device Registry][Device Registry] section.
+When you pair a device with a user account, an access token is generated for the device. This token is what the device uses to connect to Grandeur. This token also delegates access of the device namespace to the Py SDK. The Py SDK takes this access token along with the project's API Key while doing `grandeur.init()`. To read about the device's namespace and how the device's data is stored on Grandeur, have a look at the [Device Registry](#device-registry) section.
 
 > ***NOTE***: A user cannot pair with a device that is already paired.
 
@@ -468,15 +458,13 @@ The device registry constitutes one of the key elements of Grandeur. There are t
 * Those which deal with user's authentication only e.g. firebase and
 * Those which employ a device's registry e.g. Google IoT Core, to make sure no unauthorized devices get into your network.
 
-We wanted to combine the best of both worlds. This is why at Grandeur, not do we just authenticate a device on connection, we also maintain a device's registry for you. See [Authentication and Access][Authentication and Access] section for detail on how a device is authenticated on Grandeur.
+We wanted to combine the best of both worlds. This is why at Grandeur, not do we just authenticate a device on connection, we also maintain a device's registry for you. See [Authentication and Access](#authentication-and-access) section for detail on how a device is authenticated on Grandeur.
 
 When you register a device, you make it available in your project's network. Not just that, a new namespace is created for your device in the device registry. When your device comes online, this is where all of its data is stored, in the form of i) Summary and ii) Parms.
 
 Now let's define what you can store in **Parms** and **Summary**. To be honest, there is no hard and fast rule about it. We just created two objects instead of a single one to help you develop understanding. However, we generally take the *parms as the directly controllable device variables* and the *summary as those device variables which are not directly controllable* or are just needed to be logged or displayed to apps. In another way, the parms sometimes refer to the inputs from the user and the summary refers to the outputs of the device resulting from the inputs. Consider an example where you have a smart light bulb. The parms can store the bulb ON/OFF state which the user can control, while in summary, you can log the voltage consumption of the bulb.
 
-We defined these two objects just to give you a basic framework to work on and build your logic fast. But we are very flexible in what and how you store data in the device registry. You can define an initial schema of these objects using [models][models] and go on from there.
-
-### Models
+We defined these two objects just to give you a basic framework to work on and build your logic fast. But we are very flexible in what and how you store data in the device registry. You can define an initial schema of these objects using models and go on from there.
 
 ### Authentication and Access
 
@@ -631,7 +619,7 @@ project.onConnection(connectionHandler)
 
 > device (deviceID: str) -> Device
 
-This method returns a reference to object of the **Device** class. Read about **Device** class [here][Device Class].
+This method returns a reference to object of the **Device** class.
 
 #### Example
 
@@ -653,7 +641,7 @@ Device's `Data` class exposes the following functions:
 
 ### get
 
-> get(path: str, callback: Callable[[dict], None]) -> None
+> get(path: str, callback: Callable[[str, dict], None]) -> None
 
 This method gets a device variable from Grandeur.
 
@@ -662,7 +650,7 @@ This method gets a device variable from Grandeur.
 | Name        | Type       | Description                                                  |
 |-------------|------------|--------------------------------------------------------------|
 | path        | str   | Path of the device variable using dot notation            |
-| callback    | Callable[[dict], None] | A function to be called when get response is received        |
+| callback    | Callable[[str, dict], None] | A function to be called when get response is received        |
 
 #### Example
 
@@ -676,7 +664,7 @@ project = grandeur.init(APIKey, Token)
 device = project.device(DeviceID)
 
 # Function to handle the response on get call
-def getCallback(res):
+def getCallback(code, res):
   print(res["data"])
 
 # Get data of the device
@@ -685,7 +673,7 @@ device.data().get("", getCallback)
 
 ### set
 
-> set(path: str, data: dict, callback: Callable[[dict], None]) ->  None
+> set(path: str, data: dict, callback: Callable[[str, dict], None]) ->  None
 
 This method updates a device variable on Grandeur with new data.
 
@@ -695,7 +683,7 @@ This method updates a device variable on Grandeur with new data.
 |-------------|---------------|--------------------------------------------------------------|
 | path        | str      | Path of the device variable using dot notation               |
 | data        | dict         | New data to store in the variable                            |
-| callback    | Callable[[dict], None]    | A function to be called when set response is received        |
+| callback    | Callable[[str, dict], None]    | A function to be called when set response is received        |
 
 #### Example
 
@@ -709,7 +697,7 @@ project = grandeur.init(APIKey, Token)
 device = project.device(DeviceID)
 
 # Function to handle the response on get call
-def setCallback(res):
+def setCallback(code, res):
   print(res["update"])
 
 # Store new data in a dict
@@ -721,7 +709,7 @@ device.data().set("", data, setCallback)
 
 ### on
 
-> on(path: str, callback: Callable[[dict], None]) -> Subscriber
+> on(path: str, callback: Callable[[str, dict], None]) -> Subscriber
 
 This method schedules a function to be called when a device variable changes on Grandeur.
 
@@ -732,9 +720,7 @@ This method schedules a function to be called when a device variable changes on 
 | Name        | Type       | Description                                    |
 |-------------|------------|------------------------------------------------|
 | path        | str   | Path of the device variable using dot notation |
-| callback    | Callable[[dict], None] | An update handler for the device variable      |
-
-More on Callback [here][callback].
+| callback    | Callable[[str, dict], None] | An update handler for the device variable      |
 
 #### Example
 
@@ -748,7 +734,7 @@ project = grandeur.init(APIKey, Token)
 device = project.device(DeviceID)
 
 # Function to handle the update from server
-def updateHandler(update, path):
+def updateHandler(path, update):
   print(update)
 
 # Get data of the device

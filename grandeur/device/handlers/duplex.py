@@ -138,11 +138,21 @@ class duplex:
                     # Event emit where there is a possible match
                     if re.match(sub, topic):
                         # Found a match so emit 
-                        self.subscriptions.emit(sub, data["payload"]["update"], data["payload"]["path"])
+                        self.subscriptions.emit(sub, data["payload"]["path"], data["payload"]["update"])
 
             else:
+                # Get code out of payload
+                code = data["payload"]["code"]
+
+                # Create a copy of payload
+                payload = data["payload"];
+
+                # Strip code and message out of dict
+                del payload["code"]
+                del payload["message"]
+
                 # Emit event and send payload
-                self.tasks.emit(data["header"]["id"], data["payload"])
+                self.tasks.emit(data["header"]["id"], code, payload)
 
                 # Since we have recieved the response so we can now remove
                 # the packet from buffer
@@ -218,7 +228,7 @@ class duplex:
         self.buffer.forEach(send)
 
     # Function to send a packet to the server
-    def send(self, event: str, payload: dict, callback: Callable[[dict], None]) -> None:
+    def send(self, event: str, payload: dict, callback: Callable[[str, dict], None]) -> None:
         # Start with generating a new id
         id = time.time()
 
@@ -244,7 +254,7 @@ class duplex:
             self.buffer.push(id, packet)
     
     # Function to subscribe to an event
-    def subscribe(self, event: str, payload: str, callback: Callable[[dict], None]) -> Subscriber:
+    def subscribe(self, event: str, payload: str, callback: Callable[[str, dict], None]) -> Subscriber:
         # We will start with validating the event
         try:
             # Check if event exists in the list
@@ -259,7 +269,7 @@ class duplex:
             return
 
         # Function to handle response of the packet
-        def response(data):
+        def response(code, res):
             # Place event listener only after getting a response
             self.subscriptions.on(f"{payload['event']}/{payload['path']}", callback)
 
