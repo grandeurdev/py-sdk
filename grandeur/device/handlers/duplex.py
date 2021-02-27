@@ -20,9 +20,13 @@ Subscriber = TypeVar('Subscriber')
 class EventEmitter(BaseEventEmitter):
 
     # Function to get event names
-    def eventNames(self) -> dict:
-        # Return keys of events
-        return self._events.keys()
+    def pEmit(self, topic, *args, **kwargs) -> dict:
+        # Loop over the events keys
+        for sub in self._events.keys():
+            # Event emit where there is a possible match
+            if re.match(sub, topic):
+                # Found a match so emit 
+                self.emit(sub, *args, **kwargs)
 
 # Object to store the events 
 class buffer():
@@ -132,13 +136,8 @@ class duplex:
                 # Formulate topic string
                 topic = f'{data["payload"]["event"]}/{data["payload"]["path"]}'
 
-                # When the event is data type then use regex method
-                # Loop over list of topics
-                for sub in self.subscriptions.eventNames():
-                    # Event emit where there is a possible match
-                    if re.match(sub, topic):
-                        # Found a match so emit 
-                        self.subscriptions.emit(sub, data["payload"]["path"], data["payload"]["update"])
+                # Emit the event
+                self.subscriptions.pEmit(topic, data["payload"]["path"], data["payload"]["update"])
 
             else:
                 # Get code out of payload
