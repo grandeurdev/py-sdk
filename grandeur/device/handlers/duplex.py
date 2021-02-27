@@ -301,26 +301,15 @@ class duplex:
         res = SimpleNamespace()
 
         # Define clear function
-        def clear(c: Callable[[dict], None]) -> None: 
-            # Create the packet
-            packet = {
-                "header": {
-                    "task": "/topic/unsubscribe"
-                },
-                "payload": {
-                    "event": event,
-                    "deviceID": deviceID
-                }
-            }
-
+        def clear(c: Callable[[str, dict], None]) -> None: 
             # Remove the listener
-            self.subscriptions.remove_listener(event + "/" + deviceID, callback)
+            self.subscriptions.remove_listener(f"{payload['event']}/{payload['path']}", callback)
 
             # Remove sub packet from buffer
             self.buffer.remove(id)
 
             # Send to server
-            self.send(packet, c)
+            self.send("/topic/unsubscribe", payload, c)
 
         # Append a lambda on close key
         res.clear = clear
