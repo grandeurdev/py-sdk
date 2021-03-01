@@ -20,9 +20,13 @@ Subscriber = TypeVar('Subscriber')
 class EventEmitter(BaseEventEmitter):
 
     # Function to get event names
-    def eventNames(self) -> dict:
-        # Return keys of events
-        return self._events.keys()
+    def pEmit(self, topic, *args, **kwargs) -> dict:
+        # Loop over the events keys
+        for sub in self._events.keys():
+            # Event emit where there is a possible match
+            if re.match(sub, topic):
+                # Found a match so emit 
+                self.emit(sub, *args, **kwargs)
 
 # Object to store the events 
 class buffer():
@@ -132,17 +136,22 @@ class duplex:
                 # Formulate topic string
                 topic = f'{data["payload"]["event"]}/{data["payload"]["path"]}'
 
-                # When the event is data type then use regex method
-                # Loop over list of topics
-                for sub in self.subscriptions.eventNames():
-                    # Event emit where there is a possible match
-                    if re.match(sub, topic):
-                        # Found a match so emit 
-                        self.subscriptions.emit(sub, data["payload"]["update"], data["payload"]["path"])
+                # Emit the event
+                self.subscriptions.pEmit(topic, data["payload"]["path"], data["payload"]["update"])
 
             else:
+                # Get code out of payload
+                code = data["payload"]["code"]
+
+                # Create a copy of payload
+                payload = data["payload"];
+
+                # Strip code and message out of dict
+                del payload["code"]
+                del payload["message"]
+
                 # Emit event and send payload
-                self.tasks.emit(data["header"]["id"], data["payload"])
+                self.tasks.emit(data["header"]["id"], code, payload)
 
                 # Since we have recieved the response so we can now remove
                 # the packet from buffer
@@ -218,7 +227,7 @@ class duplex:
         self.buffer.forEach(send)
 
     # Function to send a packet to the server
-    def send(self, event: str, payload: dict, callback: Callable[[dict], None]) -> None:
+    def send(self, event: str, payload: dict, callback: Callable[[str, dict], None]) -> None:
         # Start with generating a new id
         id = time.time()
 
@@ -244,7 +253,7 @@ class duplex:
             self.buffer.push(id, packet)
     
     # Function to subscribe to an event
-    def subscribe(self, event: str, payload: str, callback: Callable[[dict], None]) -> Subscriber:
+    def subscribe(self, event: str, payload: str, callback: Callable[[str, dict], None]) -> Subscriber:
         # We will start with validating the event
         try:
             # Check if event exists in the list
@@ -259,7 +268,7 @@ class duplex:
             return
 
         # Function to handle response of the packet
-        def response(data):
+        def response(code, res):
             # Place event listener only after getting a response
             self.subscriptions.on(f"{payload['event']}/{payload['path']}", callback)
 
@@ -291,26 +300,15 @@ class duplex:
         res = SimpleNamespace()
 
         # Define clear function
-        def clear(c: Callable[[dict], None]) -> None: 
-            # Create the packet
-            packet = {
-                "header": {
-                    "task": "/topic/unsubscribe"
-                },
-                "payload": {
-                    "event": event,
-                    "deviceID": deviceID
-                }
-            }
-
+        def clear(c: Callable[[str, dict], None]) -> None: 
             # Remove the listener
-            self.subscriptions.remove_listener(event + "/" + deviceID, callback)
+            self.subscriptions.remove_listener(f"{payload['event']}/{payload['path']}", callback)
 
             # Remove sub packet from buffer
             self.buffer.remove(id)
 
             # Send to server
-            self.send(packet, c)
+            self.send("/topic/unsubscribe", payload, c)
 
         # Append a lambda on close key
         res.clear = clear

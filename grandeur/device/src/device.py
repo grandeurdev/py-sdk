@@ -20,7 +20,7 @@ class data:
         self.deviceID = deviceID
 
     # Function to get the device data from server
-    def get(self, path: str, callback: Callable[[dict], None]) -> None:
+    def get(self, path: str, callback: Callable[[str, dict], None]) -> None:
         # Form the request packet
         payload = {
             "deviceID": self.deviceID,
@@ -31,7 +31,7 @@ class data:
         self.duplex.send("/device/data/get", payload, callback)
 
     # Function to set the device data on server
-    def set(self, path: str, data: dict, callback: Callable[[dict], None]) ->  None:
+    def set(self, path: str, data: dict, callback: Callable[[str, dict], None]) ->  None:
         # Form the request packet
         payload = {
             "deviceID": self.deviceID,
@@ -43,7 +43,7 @@ class data:
         self.duplex.send("/device/data/set", payload, callback)
 
     # Function to attach listener on data updates
-    def on(self, path: str, callback: Callable[[dict], None]) -> Subscriber:
+    def on(self, path: str, callback: Callable[[str, dict], None]) -> Subscriber:
         # Form the request packet
         payload = {
             "deviceID": self.deviceID,
