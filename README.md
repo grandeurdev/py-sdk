@@ -51,7 +51,7 @@ To get a deeper understanding of the core concepts Grandeur is built upon, dive 
   * [Inclusion](#inclusion)
   * [Setting Up Connection Event Handler](#setting-up-connection-event-handler)
   * [Fetching Device Variables and Updating Them](#fetching-device-variables-and-updating-them)
-  * [Handling Updates From the Cloud](#handling-updates-from-the-cloud)
+  * [Handling Updates From Grandeur](#handling-updates-from-the-cloud)
 * [Example](#example)
 * [The Dexterity of Py SDK](#the-dexterity-of-py-sdk)
 * [Grandeur Ecosystem](#grandeur-ecosystem)
@@ -113,11 +113,11 @@ project = grandeur.init(ApiKey, DeviceToken)
 # Initializes the SDK's configurations and returns your project reference.
 ```
 
-As soon as you call `grandeur.init()`, the SDK uses the configurations to start trying to connect with the your project on the Cloud.
+As soon as you call `grandeur.init()`, the SDK uses the configurations to start trying to connect with the your project on Grandeur.
 
 ### Setting Up Connection Event Handler
 
-You can also listen on SDK's connection-related events. For example, to run some code when the device makes a successful connection to the cloud or when the device's connection to the cloud breaks, you can wrap that code in a function and pass it to `Project`'s `onConnection()` function.
+You can also listen on SDK's connection-related events. For example, to run some code when the device makes a successful connection to Grandeur or when the device's connection to Grandeur breaks, you can wrap that code in a function and pass it to `Project`'s `onConnection()` function.
 
 Here's how you can handle the connection event:
 
@@ -127,7 +127,7 @@ import grandeur.device as grandeur
 # Init the SDK and get reference to the project
 project = grandeur.init(ApiKey, DeviceToken)
 
-# This method handles the events related to device's connection with the Cloud.
+# This method handles the events related to device's connection with Grandeur.
 def onConnection(state):
     # Prints the current state
     print(state)
@@ -136,9 +136,9 @@ def onConnection(state):
 project.onConnection(onConnection)
 
 # **RESULT**
-# Prints CONNECTED when device gets connected to the cloud.
+# Prints CONNECTED when device gets connected to Grandeur.
 # And prints DISCONNECTED when device's connection from
-# the cloud breaks.
+# Grandeur breaks.
 ```
 
 ### Fetching Device Variables and Updating Them
@@ -148,16 +148,16 @@ On Grandeur, we generally store the device data in a sanboxed contianer. You can
 * `device.data().get()`
 * `device.data().set()`
 
-They are all **Async functions** because they communicate with the Cloud through internet. Communication through internet takes some time and we cannot wait, for example, for device's summary variables to arrive from the Cloud — meanwhile blocking the rest of the device program. So, what we do is, we schedule a function to be called when the summary variables and resume with rest of the device program, forgetting that we ever called `getSummary()`. When the summary variables arrive, the SDK calls our scheduled function, giving us access to summary variables inside that function.
+They are all **Async functions** because they communicate with Grandeur through internet. Communication through internet takes some time and we cannot wait, for example, for device's data variables to arrive from Grandeur — meanwhile blocking the rest of the device program. So, what we do is, we schedule a function to be called when the data variables and resume with rest of the device program, forgetting that we ever called `get()`. When the data variables arrive, the SDK calls our scheduled function, giving us access to data variables inside that function.
 
 Read more about **Async functions** and `Callback` [here](#the-dexterity-of-py-sdk).
 
-Here's how we would get and set device's summary and parms:
+Here's how we would get and set device's data:
 
 ```py
 import grandeur.device as grandeur
 
-# This method handles the events related to device's connection with the Cloud.
+# This method handles the events related to device's connection with Grandeur.
 def onConnection(state):
     # Prints the current state
     print(state)
@@ -188,21 +188,21 @@ data = {"voltage": 220, "current": 10}
 device.data().set("", data, setCallback)
 
 # **RESULT**
-# Data is fetched first. When they arrive from the cloud, their
+# Data is fetched first. When they arrive from Grandeur, their
 # corresponding callbacks are called which print the variables stored in data objects.
 # Then the data is updated with the new values. When their updates complete, their
 # callbacks are called with the updated values of their variables and these updated values are
 # printed on the screen.
 ```
 
-### Handling Updates From the Cloud
+### Handling Updates From Grandeur
 
 You can set **update handlers** for updates to those variables. Let's do that now:
 
 ```py
 import grandeur.device as grandeur
 
-# This method handles the events related to device's connection with the Cloud.
+# This method handles the events related to device's connection with Grandeur.
 def onConnection(state):
     # Prints the current state
     print(state)
@@ -277,7 +277,7 @@ You can find the API Key on the [settings page](https://cloud.grandeur.tech/sett
 
 ### Initialize Your Device
 
-Before doing anything, you need to initialize your device with data from the cloud to keep your device running in undefined states when it first starts. You can get all the device variables by using `get()` methods of the device. Here's how you can get the device **state** from the cloud and initialize RPi's pin — we'll use the gpiozero package to interact with RPi's GPIOs for that.
+Before doing anything, you need to initialize your device with data from Grandeur to keep your device running in undefined states when it first starts. You can get all the device variables by using `get()` methods of the device. Here's how you can get the device **state** from Grandeur and initialize RPi's pin — we'll use the gpiozero package to interact with RPi's GPIOs for that.
 
 ```py
 import grandeur.device as grandeur
@@ -299,8 +299,8 @@ device.data().get("state", initializeState)
 
 ### Set Update Handlers
 
-Update handlers are the functions which are called when a device variable is updated on the cloud. The update could be from a user or the device itself. Without the handlers, your device would not be notified when a user turns it off from the webapp.
-Here's how you can set update handlers in your sketch for the device's state stored in parms.
+Update handlers are the functions which are called when a device variable is updated on Grandeur. The update could be from a user or the device itself. Without the handlers, your device would not be notified when a user turns it off from the webapp.
+Here's how you can set update handlers in your sketch for the device's state stored.
 
 ```py
 import grandeur.device as grandeur
@@ -364,17 +364,17 @@ while(1):
 
 ### Test it With Your Web app
 
-You can build a web app for your product to control your hardware device over the cloud.
+You can build a web app for your product to control your hardware device over Grandeur.
 
 ## The Dexterity of Py SDK
 
 The Py SDK is aimed at providing extremely to-the-point functions, being almost invisible in your device program to make the integration of Grandeur in your product seamless. Here is what it does under the hood without you paying attention to the most painful things:
 
-* **Py SDK** takes care of your device's connection to [Grandeur](https://grandeur.tech/). **It can start trying to connect with the Cloud as soon as you call `grandeur.init` with the proper credentials.** When it connects, only then does the communication with Grandeur happen. And if somehow the connection breaks, SDK handles the reconnection and everything resumes right from where it left.
+* **Py SDK** takes care of your device's connection to [Grandeur](https://grandeur.tech/). **It can start trying to connect with Grandeur as soon as you call `grandeur.init` with the proper credentials.** When it connects, only then does the communication with Grandeur happen. And if somehow the connection breaks, SDK handles the reconnection and everything resumes right from where it left.
 
 *  **Py SDK** exposes the state of your device (`CONNECTED` or `DISCONNECTED`) through [`isConnected()`](#isconnected) function to let you make your decisions based on that.
 
-* **Py SDK** is event-driven. You can set **event handler** for device's connection or disconnection with Grandeur by using [`onConnection()`](#onconnection). So, when the device connects or disconnects from the cloud, the function passed to `onConnection()` is called.
+* **Py SDK** is event-driven. You can set **event handler** for device's connection or disconnection with Grandeur by using [`onConnection()`](#onconnection). So, when the device connects or disconnects from Grandeur, the function passed to `onConnection()` is called.
 
 * You can also set **update handlers** for device's sdata using [`on()`](#on). So, when the any of the device variables is updated, the function passed to `on()` is called.
 
@@ -460,9 +460,7 @@ The device registry constitutes one of the key elements of Grandeur. There are t
 
 We wanted to combine the best of both worlds. This is why at Grandeur, not do we just authenticate a device on connection, we also maintain a device's registry for you. See [Authentication and Access](#authentication-and-access) section for detail on how a device is authenticated on Grandeur.
 
-When you register a device, you make it available in your project's network. Not just that, a new namespace is created for your device in the device registry. When your device comes online, this is where all of its data is stored, in the form of i) Summary and ii) Parms.
-
-Now let's define what you can store in **Parms** and **Summary**. To be honest, there is no hard and fast rule about it. We just created two objects instead of a single one to help you develop understanding. However, we generally take the *parms as the directly controllable device variables* and the *summary as those device variables which are not directly controllable* or are just needed to be logged or displayed to apps. In another way, the parms sometimes refer to the inputs from the user and the summary refers to the outputs of the device resulting from the inputs. Consider an example where you have a smart light bulb. The parms can store the bulb ON/OFF state which the user can control, while in summary, you can log the voltage consumption of the bulb.
+When you register a device, you make it available in your project's network. Not just that, a new namespace is created for your device in the device registry. When your device comes online, this is where all of its data is stored.
 
 We defined these two objects just to give you a basic framework to work on and build your logic fast. But we are very flexible in what and how you store data in the device registry. You can define an initial schema of these objects using models and go on from there.
 
@@ -492,7 +490,7 @@ In the **Py SDK**, we only use the realtime channel. A device cannot establish a
 
 ### Allowed Origins
 
-This is another amazing topic and somehow related to access delegation in the end. As mentioned in the sections above that you can interact with your project's namespace through the JS SDK by initializing grandeur with your API key. This returns an object referring to your project which can be used to interact with its resources including its devices, datastore, and files storage. Putting this much responsibility on just the API key poses a security threat particularly in case of web apps as API Key can easily be stolen. Even though a user needs to log in first before making any request to the cloud, a hacker with having your API key can still cause some serious damage. For example, Registering bogus users to your project or creating a copycat site on your name for phishing to name a few. That's where cross-origin request sharing (CORS) policies come to play.
+This is another amazing topic and somehow related to access delegation in the end. As mentioned in the sections above that you can interact with your project's namespace through the JS SDK by initializing grandeur with your API key. This returns an object referring to your project which can be used to interact with its resources including its devices, datastore, and files storage. Putting this much responsibility on just the API key poses a security threat particularly in case of web apps as API Key can easily be stolen. Even though a user needs to log in first before making any request to Grandeur, a hacker with having your API key can still cause some serious damage. For example, Registering bogus users to your project or creating a copycat site on your name for phishing to name a few. That's where cross-origin request sharing (CORS) policies come to play.
 
 So to allow a web app to interact with your project using the Web SDK, you first need to whitelist the domain name your web app uses via the settings page in the dashboard. You cannot even send a request from your localhost without first whitelisting it.
 
@@ -506,7 +504,7 @@ A `Project` reference refers to your project on Grandeur, has the widest scope i
 
 > grandeur.init (apiKey: _String_, token: _String_) : returns _Project_
 
-This method initializes SDK's connection configurations: `apiKey` and `authToken`, and returns a reference to the Cloud `Project`. This `Project` reference lies at the widest scope and exposes all functions of the SDK.
+This method initializes SDK's connection configurations: `apiKey` and `authToken`, and returns a reference to Grandeur `Project`. This `Project` reference lies at the widest scope and exposes all functions of the SDK.
 
 #### Parameters
 
