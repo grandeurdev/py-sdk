@@ -9,6 +9,7 @@ from .handlers import duplex as Duplex
 
 # Import the inteface classes
 from .src import device as Device
+from .src import datastore as Datastore
 
 # Import libraries
 from types import SimpleNamespace
@@ -69,6 +70,11 @@ def init(apiKey: str, token: str) -> Project :
         # We will create a new device class reference and will return it
         return Device(handlers, deviceID)
 
+    # Function to get reference to datastore class
+    def datastore() -> Datastore:
+        # We will create a new datastore class reference to return it
+        return Datastore(handlers)
+
     # Add onConnection event handler to namespace
     res.onConnection = onConnection
 
@@ -77,6 +83,9 @@ def init(apiKey: str, token: str) -> Project :
 
     # Add device function
     res.device = device
+
+    # Add datastore function
+    res.datastore = datastore
 
     # and return
     return res
