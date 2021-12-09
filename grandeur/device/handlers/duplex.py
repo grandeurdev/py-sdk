@@ -107,7 +107,7 @@ class duplex:
             self.__handle()
 
         # Function to handle on close event of ws
-        def onclose(ws):
+        def onclose(ws, close_status_code, close_msg):
             # Connectin has been closed so change the status variable
             self.status = "CONNECTING"
 
@@ -119,7 +119,9 @@ class duplex:
             self.__reconnect()
 
             # Stop ping
-            self.ping.cancel()
+            if self.ping:
+                # If ping was set
+                self.ping.cancel()
 
         # Function to handle on message event of ws
         def onmessage(ws, message):

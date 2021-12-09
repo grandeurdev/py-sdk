@@ -7,7 +7,7 @@ import setuptools
 # Package metadata.
 name = 'grandeur'
 description = 'This SDK has been designed to enable developers integrate Grandeur into SOCs with Python'
-version = '0.1.5'
+version = '0.1.6'
 
 # Setup long description
 directory = path.abspath(path.dirname(__file__))
