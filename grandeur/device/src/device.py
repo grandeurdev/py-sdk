@@ -42,6 +42,17 @@ class data:
         # Send the packet using duplex
         self.duplex.send("/device/data/set", payload, callback)
 
+    def log(self, path: str, data: dict, callback: Callable[[str, dict], None]) ->  None:
+        # Form the request packet
+        payload = {
+            "deviceID": self.deviceID,
+            "path": path,
+            "data": data
+        }
+
+        # Send the packet using duplex
+        self.duplex.send("/device/data/log", payload, callback)
+
     # Function to attach listener on data updates
     def on(self, path: str, callback: Callable[[str, dict], None]) -> Subscriber:
         # Form the request packet
